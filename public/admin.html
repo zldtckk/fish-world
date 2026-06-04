@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>机构后台 - 画鱼</title>
-  <link rel="stylesheet" href="/styles.css">
+  <title>机构后台 - 大家一起来画鱼</title>
+  <link rel="stylesheet" href="/styles.css?v=2">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
   <style>
     .admin-page { max-width: 800px; margin: 0 auto; padding: 24px 0; }
@@ -23,9 +23,16 @@
     .admin-login .form-group input {
       width: 100%; padding: 10px 14px;
       border-radius: 8px; border: 1px solid rgba(74,184,232,0.15);
-      font-size: 14px; font-family: inherit; outline: none;
+      font-size: 14px; font-family: inherit; outline: none; box-sizing: border-box;
     }
     .admin-login .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,184,232,0.1); }
+    .edit-input {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid rgba(74,184,232,0.15); font-size: 14px;
+      font-family: inherit; outline: none; background: var(--bg); color: var(--text);
+      box-sizing: border-box;
+    }
+    .edit-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,184,232,0.1); }
     .admin-login .login-btn {
       width: 100%; padding: 12px;
       border-radius: 10px; border: none;
@@ -81,6 +88,7 @@
       color: var(--text);
     }
     .admin-table tr:hover td { background: rgba(74,184,232,0.03); }
+    .admin-table-wrap { overflow-x: auto; }
 
     .has-phone { color: var(--success); font-weight: 600; }
     .no-phone { color: var(--text3); }
@@ -110,6 +118,7 @@
       cursor: pointer; font-family: inherit; white-space: nowrap;
     }
     .copy-link-btn:hover { background: rgba(74,184,232,0.08); }
+
     .form-tab {
       flex: 1; padding: 8px 16px; border-radius: 8px;
       border: 1px solid rgba(74,184,232,0.15);
@@ -119,13 +128,21 @@
     .form-tab.active {
       background: var(--accent); color: #fff; border-color: var(--accent);
     }
+
+    .fish-preview-img { max-width: 60px; max-height: 40px; border-radius: 4px; vertical-align: middle; }
+    .edit-btn {
+      padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(74,184,232,0.2);
+      background: transparent; color: var(--accent-dark); font-size: 12px;
+      cursor: pointer; font-family: inherit;
+    }
+    .edit-btn:hover { background: rgba(74,184,232,0.08); }
   </style>
 </head>
 <body>
   <div class="ocean-bg"></div>
   <header>
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <a href="/" class="logo">🐟 画鱼</a>
+      <a href="/" class="logo">🐟 大家一起来画鱼</a>
       <nav>
         <a href="/" class="nav-btn">水族箱</a>
         <a href="/admin.html" class="nav-btn active">🏫 机构后台</a>
@@ -139,6 +156,7 @@
       <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
         <button id="tabLogin" class="form-tab active" onclick="showLogin()">登录</button>
         <button id="tabRegister" class="form-tab" onclick="showRegister()">注册</button>
+        <button id="tabSuper" class="form-tab" onclick="showSuperLogin()">👑 超级管理员</button>
       </div>
 
       <!-- Login form -->
@@ -173,6 +191,20 @@
         <button class="login-btn" onclick="doRegister()">注册</button>
       </div>
 
+      <!-- Super admin login form -->
+      <div id="superPanel" style="display:none">
+        <h2>👑 超级管理员</h2>
+        <div class="form-group">
+          <label>账号</label>
+          <input type="text" id="superUser" placeholder="管理员账号">
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="superPassword" placeholder="密码" onkeydown="if(event.key==='Enter')doSuperLogin()">
+        </div>
+        <button class="login-btn" onclick="doSuperLogin()">登录</button>
+      </div>
+
       <div class="admin-error" id="loginError"></div>
     </div>
 
@@ -191,26 +223,76 @@
           <input type="text" id="newActivityName" placeholder="新活动名称，如：万达广场站">
           <button onclick="createActivity()">+ 创建活动</button>
         </div>
-        <table class="admin-table" id="activityTable">
-          <thead><tr><th>活动名称</th><th>活动码</th><th>作品</th><th>总赞</th><th>创建时间</th><th>操作</th></tr></thead>
-          <tbody id="activityBody"></tbody>
-        </table>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="activityTable">
+            <thead><tr><th>活动名称</th><th>活动码</th><th>作品</th><th>总赞</th><th>创建时间</th><th>操作</th></tr></thead>
+            <tbody id="activityBody"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="admin-section">
         <h3>📋 作品列表</h3>
-        <table class="admin-table" id="fishTable">
-          <thead><tr><th>鱼名</th><th>孩子</th><th>年龄</th><th>⭐ 赞</th><th>📱 留资</th><th>时间</th></tr></thead>
-          <tbody id="fishBody"></tbody>
-        </table>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="fishTable">
+            <thead><tr><th>鱼名</th><th>孩子</th><th>年龄</th><th>⭐ 赞</th><th>📱 留资</th><th>时间</th></tr></thead>
+            <tbody id="fishBody"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="admin-section">
         <h3>📱 家长留资</h3>
-        <table class="admin-table" id="leadTable">
-          <thead><tr><th>手机号</th><th>孩子</th><th>年龄</th><th>鱼名</th><th>时间</th></tr></thead>
-          <tbody id="leadBody"></tbody>
-        </table>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="leadTable">
+            <thead><tr><th>手机号</th><th>孩子</th><th>年龄</th><th>鱼名</th><th>时间</th></tr></thead>
+            <tbody id="leadBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Super Admin Dashboard -->
+    <div id="superDashboard" class="admin-page dashboard">
+      <div class="dashboard-header">
+        <h2>👑 超级管理员</h2>
+        <button class="logout-btn" onclick="doLogout()">退出登录</button>
+      </div>
+      <div class="stat-cards" id="superStatCards"></div>
+      <div class="admin-section">
+        <h3>🏫 机构列表</h3>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="superInstTable">
+            <thead><tr><th>机构名称</th><th>手机号</th><th>作品数</th><th>留资数</th><th>总赞</th><th>注册时间</th></tr></thead>
+            <tbody id="superInstBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="admin-section">
+        <h3>📱 全部留资</h3>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="superLeadTable">
+            <thead><tr><th>手机号</th><th>孩子</th><th>年龄</th><th>鱼名</th><th>机构</th><th>时间</th></tr></thead>
+            <tbody id="superLeadBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="admin-section">
+        <h3>🐟 全部作品管理</h3>
+        <div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">
+          <button class="login-btn" style="padding:6px 16px;font-size:13px" onclick="superDeleteFish()">🗑️ 删除选中</button>
+          <button class="login-btn" style="padding:6px 16px;font-size:13px" onclick="superEditFish()">✏️ 编辑选中</button>
+          <span id="superFishCount" style="font-size:13px;color:var(--text2);margin-left:8px"></span>
+        </div>
+        <div class="admin-table-wrap" style="max-height:500px;overflow-y:auto;border:1px solid rgba(74,184,232,0.1);border-radius:8px">
+          <table class="admin-table" id="superFishTable">
+            <thead><tr>
+              <th style="width:36px"><input type="checkbox" id="superFishAll" onchange="superToggleAllFish(this.checked)"></th>
+              <th>预览</th><th>鱼名</th><th>孩子</th><th>年龄</th><th>手机</th><th>机构</th><th>赞</th><th>状态</th><th>时间</th>
+            </tr></thead>
+            <tbody id="superFishBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
@@ -221,7 +303,13 @@
     let token = localStorage.getItem('adminToken');
 
     window.addEventListener('load', () => {
-      if (token) loadDashboard();
+      if (token) {
+        if (localStorage.getItem('isSuperAdmin')) {
+          loadSuperDashboard();
+        } else {
+          loadDashboard();
+        }
+      }
     });
 
     // ─── Login / Register tabs ───
@@ -229,16 +317,30 @@
     function showLogin() {
       document.getElementById('tabLogin').classList.add('active');
       document.getElementById('tabRegister').classList.remove('active');
+      document.getElementById('tabSuper').classList.remove('active');
       document.getElementById('loginPanel').style.display = 'block';
       document.getElementById('registerPanel').style.display = 'none';
+      document.getElementById('superPanel').style.display = 'none';
       document.getElementById('loginError').textContent = '';
     }
 
     function showRegister() {
       document.getElementById('tabRegister').classList.add('active');
       document.getElementById('tabLogin').classList.remove('active');
+      document.getElementById('tabSuper').classList.remove('active');
       document.getElementById('registerPanel').style.display = 'block';
       document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('superPanel').style.display = 'none';
+      document.getElementById('loginError').textContent = '';
+    }
+
+    function showSuperLogin() {
+      document.getElementById('tabSuper').classList.add('active');
+      document.getElementById('tabLogin').classList.remove('active');
+      document.getElementById('tabRegister').classList.remove('active');
+      document.getElementById('superPanel').style.display = 'block';
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('registerPanel').style.display = 'none';
       document.getElementById('loginError').textContent = '';
     }
 
@@ -277,8 +379,48 @@
       token = null;
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminName');
+      localStorage.removeItem('isSuperAdmin');
       document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('superDashboard').style.display = 'none';
       document.getElementById('loginForm').style.display = 'block';
+    }
+
+    // ─── Super Admin Login ───
+
+    async function doSuperLogin() {
+      const username = document.getElementById('superUser').value.trim();
+      const password = document.getElementById('superPassword').value.trim();
+      const errorEl = document.getElementById('loginError');
+      if (!username || !password) { errorEl.textContent = '请输入账号和密码'; return; }
+      errorEl.textContent = '';
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          // Verify it's a super admin
+          const checkRes = await fetch('/api/admin/super/dashboard', {
+            headers: { 'Authorization': data.token }
+          });
+          if (!checkRes.ok) {
+            errorEl.textContent = '该账号无超级管理员权限';
+            return;
+          }
+          token = data.token;
+          localStorage.setItem('adminToken', token);
+          localStorage.setItem('isSuperAdmin', '1');
+          loadSuperDashboard();
+        } else {
+          errorEl.textContent = data.error || '登录失败';
+        }
+      } catch (e) {
+        errorEl.textContent = '网络错误';
+      }
     }
 
     // ─── Register ───
@@ -353,7 +495,7 @@
     function renderActivities(activities) {
       const tbody = document.getElementById('activityBody');
       if (!activities || activities.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2)">暂无活动</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">暂无活动</td></tr>';
         return;
       }
       tbody.innerHTML = activities.map(a => `
@@ -371,7 +513,7 @@
     function renderFishList(list) {
       const tbody = document.getElementById('fishBody');
       if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2)">暂无作品</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">暂无作品</td></tr>';
         return;
       }
       tbody.innerHTML = list.map(f => `
@@ -389,7 +531,7 @@
     function renderLeads(leads) {
       const tbody = document.getElementById('leadBody');
       if (!leads || leads.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2)">暂无留资</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">暂无留资</td></tr>';
         return;
       }
       tbody.innerHTML = leads.map(l => `
@@ -401,6 +543,68 @@
           <td>${new Date(l.created_at).toLocaleDateString()}</td>
         </tr>
       `).join('');
+    }
+
+    // ─── Super Admin Dashboard ───
+
+    let superAllFish = [];
+
+    async function loadSuperDashboard() {
+      try {
+        const res = await fetch('/api/admin/super/dashboard', {
+          headers: { 'Authorization': token }
+        });
+        if (!res.ok) { doLogout(); return; }
+        const data = await res.json();
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('superDashboard').style.display = 'block';
+
+        document.getElementById('superStatCards').innerHTML = `
+          <div class="stat-card"><div class="num">${data.stats.total_institutions}</div><div class="lbl">🏫 机构</div></div>
+          <div class="stat-card"><div class="num">${data.stats.total_fish}</div><div class="lbl">🐟 作品总数</div></div>
+          <div class="stat-card"><div class="num">${data.stats.total_votes}</div><div class="lbl">⭐ 总赞</div></div>
+          <div class="stat-card"><div class="num">${data.stats.total_leads}</div><div class="lbl">📱 总留资</div></div>
+        `;
+
+        // Institution table
+        const instBody = document.getElementById('superInstBody');
+        if (data.institutions.length === 0) {
+          instBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">暂无机构</td></tr>';
+        } else {
+          instBody.innerHTML = data.institutions.map(inst => `
+            <tr>
+              <td><strong>${escHtml(inst.name)}</strong></td>
+              <td>${escHtml(inst.phone)}</td>
+              <td>${inst.fish_count}</td>
+              <td style="font-weight:600;color:var(--success)">${inst.lead_count}</td>
+              <td>⭐ ${inst.total_votes}</td>
+              <td>${inst.created_at ? new Date(inst.created_at).toLocaleDateString() : '-'}</td>
+            </tr>
+          `).join('');
+        }
+
+        // Lead table
+        const leadBody = document.getElementById('superLeadBody');
+        if (data.leads.length === 0) {
+          leadBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">暂无留资</td></tr>';
+        } else {
+          leadBody.innerHTML = data.leads.map(l => `
+            <tr>
+              <td style="font-weight:600">${escHtml(l.phone)}</td>
+              <td>${escHtml(l.child_name)}</td>
+              <td>${escHtml(l.age || '-')}</td>
+              <td>${escHtml(l.fish_name)}</td>
+              <td>${l.institution_name ? escHtml(l.institution_name) : '<span style="color:var(--text3)">未归属</span>'}</td>
+              <td>${new Date(l.created_at).toLocaleDateString()}</td>
+            </tr>
+          `).join('');
+        }
+
+        // Load fish list
+        loadSuperFish();
+      } catch (e) {
+        showToast('加载失败');
+      }
     }
 
     // ─── Create activity ───
@@ -430,6 +634,147 @@
       }
     }
 
+    // ─── Super Admin — Fish Management ───
+
+    async function loadSuperFish() {
+      try {
+        const res = await fetch('/api/admin/super/fish', {
+          headers: { 'Authorization': token }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        superAllFish = data.fish;
+        renderSuperFish();
+      } catch (e) {}
+    }
+
+    function renderSuperFish() {
+      const body = document.getElementById('superFishBody');
+      const count = document.getElementById('superFishCount');
+      document.getElementById('superFishAll').checked = false;
+      if (!superAllFish || superAllFish.length === 0) {
+        body.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text2);padding:30px">暂无作品</td></tr>';
+        count.textContent = '共 0 条';
+        return;
+      }
+      count.textContent = `共 ${superAllFish.length} 条`;
+      body.innerHTML = superAllFish.map(f => {
+        const safeName = escHtml(f.name);
+        const safeChild = escHtml(f.child_name || '-');
+        const safeAge = escHtml(f.age || '-');
+        const safePhone = f.phone ? escHtml(f.phone) : '';
+        return `<tr>
+          <td><input type="checkbox" class="super-fish-cb" value="${f.id}" onchange="superUpdateSelectAll()"></td>
+          <td><img class="fish-preview-img" src="${f.image_data}" alt=""></td>
+          <td>${safeName}</td>
+          <td>${safeChild}</td>
+          <td>${safeAge}</td>
+          <td>${safePhone || '<span style="color:var(--text3)">—</span>'}</td>
+          <td>${f.institution_name ? escHtml(f.institution_name) : '<span style="color:var(--text3)">未归属</span>'}</td>
+          <td>⭐ ${f.votes}</td>
+          <td>${f.is_visible ? '✅ 显示' : '🚫 隐藏'}</td>
+          <td>${new Date(f.created_at).toLocaleDateString()}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function superUpdateSelectAll() {
+      const cbs = document.querySelectorAll('.super-fish-cb');
+      const all = document.getElementById('superFishAll');
+      const checked = document.querySelectorAll('.super-fish-cb:checked');
+      all.checked = checked.length === cbs.length && cbs.length > 0;
+    }
+
+    function superToggleAllFish(checked) {
+      document.querySelectorAll('.super-fish-cb').forEach(cb => cb.checked = checked);
+    }
+
+    function getSelectedFishIds() {
+      return Array.from(document.querySelectorAll('.super-fish-cb:checked')).map(cb => cb.value);
+    }
+
+    function superDeleteFish() {
+      const ids = getSelectedFishIds();
+      if (ids.length === 0) { showToast('请先选择要删除的鱼'); return; }
+      if (!confirm(`确定要删除选中的 ${ids.length} 条鱼吗？此操作不可恢复！`)) return;
+      fetch('/api/admin/super/fish/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+        body: JSON.stringify({ ids })
+      }).then(r => r.json()).then(d => {
+        if (d.success) {
+          showToast(`✅ 已删除 ${d.deleted} 条鱼`);
+          loadSuperFish();
+          loadSuperDashboard();
+        } else {
+          showToast('删除失败');
+        }
+      }).catch(() => showToast('网络错误'));
+    }
+
+    function superEditFish() {
+      const ids = getSelectedFishIds();
+      if (ids.length === 0) { showToast('请先选择要编辑的鱼'); return; }
+      if (ids.length > 1) { showToast('每次只能编辑一条鱼'); return; }
+      const fish = superAllFish.find(f => f.id === ids[0]);
+      if (!fish) return;
+
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center';
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+      const box = document.createElement('div');
+      box.style.cssText = 'background:var(--bg);border-radius:16px;padding:28px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3)';
+      box.innerHTML = `
+        <h3 style="margin-bottom:16px">✏️ 编辑作品</h3>
+        <div class="form-group"><label>鱼名</label><input type="text" id="editFishName" value="${escHtml(fish.name).replace(/"/g, '&quot;')}" class="edit-input"></div>
+        <div class="form-group"><label>孩子昵称</label><input type="text" id="editChildName" value="${escHtml(fish.child_name || '').replace(/"/g, '&quot;')}" class="edit-input"></div>
+        <div class="form-group"><label>年龄</label><input type="text" id="editAge" value="${escHtml(fish.age || '').replace(/"/g, '&quot;')}" class="edit-input"></div>
+        <div class="form-group" style="margin:12px 0">
+          <label><input type="checkbox" id="editVisible" ${fish.is_visible ? 'checked' : ''}> 显示在公共水族箱</label>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+          <button class="logout-btn" onclick="this.closest('[id=overlay]').remove()">取消</button>
+          <button class="login-btn" id="editSaveBtn" onclick="superSaveFish('${fish.id}')">保存</button>
+        </div>
+      `;
+      overlay.id = 'overlay';
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+    }
+
+    async function superSaveFish(fishId) {
+      const btn = document.getElementById('editSaveBtn');
+      btn.disabled = true;
+      btn.textContent = '保存中...';
+      try {
+        const res = await fetch(`/api/admin/super/fish/${fishId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': token },
+          body: JSON.stringify({
+            name: document.getElementById('editFishName').value.trim(),
+            child_name: document.getElementById('editChildName').value.trim(),
+            age: document.getElementById('editAge').value.trim(),
+            is_visible: document.getElementById('editVisible').checked
+          })
+        });
+        const d = await res.json();
+        if (d.success) {
+          showToast('✅ 已保存');
+          const overlay = document.getElementById('overlay');
+          if (overlay) overlay.remove();
+          loadSuperFish();
+          loadSuperDashboard();
+        } else {
+          showToast('保存失败');
+        }
+      } catch (e) {
+        showToast('网络错误');
+      }
+      btn.disabled = false;
+      btn.textContent = '保存';
+    }
+
     // ─── Utils ───
 
     function copyActivityLink(code) {
@@ -437,7 +782,6 @@
       navigator.clipboard.writeText(url).then(() => {
         showToast('✅ 活动链接已复制！');
       }).catch(() => {
-        // fallback
         const input = document.createElement('input');
         input.value = url;
         document.body.appendChild(input);

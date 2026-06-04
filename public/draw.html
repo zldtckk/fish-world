@@ -3,124 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>画鱼 - 我也要画</title>
-  <link rel="stylesheet" href="/styles.css">
+  <title>大家一起来画鱼</title>
+  <link rel="stylesheet" href="/styles.css?v=2">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
-  <style>
-    /* Mode overlay */
-    .mode-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(240,247,251,0.97);
-      backdrop-filter: blur(10px);
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .mode-overlay.hidden { display: none; }
-    .mode-select { text-align: center; padding: 20px; }
-    .mode-select h2 { font-size: 24px; margin-bottom: 6px; }
-    .mode-select p { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
-    .mode-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .mode-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding: 28px 36px;
-      border-radius: 16px;
-      border: 2px solid rgba(74,184,232,0.15);
-      background: var(--surface);
-      cursor: pointer;
-      transition: all 0.25s;
-      width: 200px;
-      font-family: inherit;
-    }
-    .mode-btn:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-hover); }
-    .mode-btn .icon { font-size: 40px; }
-    .mode-btn .label { font-size: 16px; font-weight: 600; color: var(--text); }
-    .mode-btn .desc { font-size: 12px; color: var(--text2); }
-
-    .camera-section { text-align: center; padding: 20px 0; display: none; }
-    .camera-section video {
-      width: 100%; max-width: 500px; border-radius: 12px;
-      border: 2px solid rgba(74,184,232,0.2); background: #000;
-    }
-    .camera-actions { display: flex; gap: 10px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
-    .cam-btn {
-      padding: 10px 24px; border-radius: 24px; border: none;
-      font-size: 15px; font-family: inherit; cursor: pointer; transition: all 0.2s;
-    }
-    .cam-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-    .cam-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(74,184,232,0.35); }
-    .cam-btn.secondary { background: var(--bg); color: var(--text2); border: 1px solid rgba(74,184,232,0.15); }
-    .cam-btn.secondary:hover { color: var(--text); }
-
-    .crop-area { text-align: center; padding: 20px 0; display: none; }
-    .crop-area img { max-width: 100%; max-height: 400px; border-radius: 12px; border: 2px solid rgba(74,184,232,0.2); }
-    .crop-prompt { color: var(--text2); font-size: 13px; margin-bottom: 8px; }
-    .crop-prompt strong { color: var(--text); }
-
-    .back-btn {
-      display: inline-block; padding: 8px 16px; border-radius: 20px;
-      border: 1px solid rgba(74,184,232,0.15); background: transparent;
-      color: var(--text2); font-size: 13px; cursor: pointer; font-family: inherit;
-      margin-bottom: 12px; text-decoration: none;
-    }
-    .back-btn:hover { border-color: var(--accent); color: var(--accent-dark); }
-
-    /* AI Comment */
-    .comment-section {
-      background: var(--surface); border-radius: 16px; padding: 28px;
-      margin: 20px 0; border: 1px solid rgba(74,184,232,0.1); text-align: center;
-      display: none;
-    }
-    .comment-section h3 { font-size: 20px; margin-bottom: 4px; }
-    .comment-section .subtitle { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
-    .comment-text {
-      font-size: 16px; line-height: 1.7; color: var(--text);
-      padding: 16px; background: var(--bg); border-radius: 12px; margin-bottom: 16px;
-    }
-    .radar-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
-    .radar-item .label { width: 64px; text-align: right; color: var(--text2); flex-shrink: 0; }
-    .radar-item .bar { flex: 1; height: 10px; border-radius: 5px; background: rgba(74,184,232,0.1); overflow: hidden; }
-    .radar-item .bar-fill { height: 100%; border-radius: 5px; transition: width 0.8s ease; }
-    .radar-item .pct { width: 36px; font-weight: 600; color: var(--text); flex-shrink: 0; }
-    .phone-section { border-top: 1px solid rgba(74,184,232,0.1); padding-top: 16px; margin-top: 16px; }
-    .phone-section p { color: var(--text2); font-size: 13px; margin-bottom: 10px; }
-    .phone-input-group { display: flex; gap: 8px; max-width: 320px; margin: 0 auto; }
-    .phone-input-group input {
-      flex: 1; padding: 10px 14px; border-radius: 8px;
-      border: 1px solid rgba(74,184,232,0.15); font-size: 14px; font-family: inherit; outline: none;
-    }
-    .phone-input-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,184,232,0.1); }
-    .phone-input-group button {
-      padding: 10px 20px; border-radius: 8px; border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;
-    }
-    .go-to-tank-btn {
-      display: inline-block; margin-top: 16px; padding: 12px 32px; border-radius: 24px; border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none;
-    }
-
-    .detection-result {
-      display: inline-block; padding: 6px 16px; border-radius: 20px;
-      font-size: 14px; font-weight: 500; margin-top: 8px;
-    }
-    .detection-result.pass { background: rgba(46,204,113,0.1); color: #27ae60; }
-    .detection-result.fail { background: rgba(231,76,60,0.1); color: #e74c3c; }
-  </style>
 </head>
 <body>
   <div class="ocean-bg"></div>
   <div class="bubbles" id="bubbles"></div>
 
   <header>
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <a href="/" class="logo">🐟 画鱼</a>
+    <div class="container header-inner">
+      <a href="/" class="logo">🐟 大家一起来画鱼</a>
       <nav>
         <a href="/" class="nav-btn">水族箱</a>
         <a href="/draw.html" class="nav-btn primary active">✏️ 我也要画</a>
@@ -129,63 +22,28 @@
   </header>
 
   <main class="container">
-    <!-- Mode Selection Overlay -->
-    <div class="mode-overlay" id="modeOverlay">
-      <div class="mode-select">
-        <h2>🎨 选一种方式画鱼</h2>
-        <p>小朋友画一条面朝右边的鱼吧！</p>
-        <div class="mode-btns">
-          <button class="mode-btn" onclick="chooseMode('camera')">
-            <div class="icon">📷</div>
-            <div class="label">拍照上传</div>
-            <div class="desc">画在纸上拍照上传</div>
-          </button>
-          <button class="mode-btn" onclick="chooseMode('canvas')">
-            <div class="icon">🎨</div>
-            <div class="label">直接画</div>
-            <div class="desc">在手机上直接画</div>
-          </button>
+    <!-- Institution Picker -->
+    <div id="institutionPicker" class="inst-picker">
+      <div class="inst-picker-inner">
+        <h2>🎨 选择你的机构战队</h2>
+        <p>选择你希望加入的机构战队，和他们一起画鱼！</p>
+        <div id="instList" class="inst-list">
+          <div class="loading"><div class="spinner"></div><div>加载机构列表...</div></div>
         </div>
       </div>
     </div>
 
-    <!-- Camera Section (hidden by default) -->
-    <div id="stepCamera" class="camera-section">
-      <a href="#" class="back-btn" onclick="backToMode()">← 返回选择</a>
-      <h3 style="margin-bottom:8px">📷 拍下你画的鱼</h3>
-      <p style="color:var(--text2);font-size:14px;margin-bottom:12px">把画在纸上的鱼拍下来</p>
-      <video id="cameraPreview" autoplay playsinline></video>
-      <div class="camera-actions">
-        <button class="cam-btn primary" onclick="takePhoto()">📸 拍照</button>
-        <button class="cam-btn secondary" onclick="selectFromAlbum()">🖼️ 选照片</button>
-      </div>
-      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileSelected(event)">
-    </div>
-
-    <!-- Crop Area (hidden by default) -->
-    <div id="stepCrop" class="crop-area">
-      <a href="#" class="back-btn" onclick="backToCamera()">← 重拍</a>
-      <h3>✂️ 裁剪画面</h3>
-      <p class="crop-prompt">调整裁剪框，<strong>只保留鱼的部分</strong></p>
-      <div style="position:relative;display:inline-block;max-width:100%">
-        <img id="cropImage" src="" alt="">
-      </div>
-      <div style="margin-top:12px;text-align:center">
-        <div id="detectionResult"></div>
-        <div class="camera-actions">
-          <button class="cam-btn primary" onclick="confirmPhoto()" id="confirmPhotoBtn">✅ 确认发布</button>
-          <button class="cam-btn secondary" onclick="backToCamera()">📷 重拍</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Canvas Drawing (always visible, behind overlay) -->
-    <div class="drawing-page" id="stepCanvas">
+    <!-- Drawing Canvas -->
+    <div class="drawing-page" id="stepCanvas" style="display:none">
       <div class="drawing-canvas-wrap">
         <h2>🎨 画一条鱼</h2>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:12px">
-          画一条鱼 🐟
-        </p>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:12px">画一条鱼 🐟</p>
+        <div id="instBanner" class="inst-banner" style="display:none">
+          <span>🏫 正在为</span>
+          <span class="inst-name" id="selectedInstName"></span>
+          <span>战队创作</span>
+          <button class="change-btn" onclick="showInstitutionPicker()">更换</button>
+        </div>
         <div class="canvas-wrap">
           <canvas id="drawCanvas" width="800" height="400"></canvas>
         </div>
@@ -199,15 +57,23 @@
           <div class="color-btn" data-color="#3498db" style="background:#3498db" onclick="DrawApp.setColor('#3498db')"></div>
           <div class="color-btn" data-color="#9b59b6" style="background:#9b59b6" onclick="DrawApp.setColor('#9b59b6')"></div>
           <div class="color-btn" data-color="#1abc9c" style="background:#1abc9c" onclick="DrawApp.setColor('#1abc9c')"></div>
-          <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);margin:0 6px"></div>
+          <div class="separator" style="width:1px;height:24px;background:rgba(0,0,0,0.08);margin:0 6px"></div>
           <button class="tool-btn" onclick="DrawApp.undo()">↩ 撤销</button>
           <button class="tool-btn" id="eraserBtn" onclick="DrawApp.toggleEraser()">🧹 橡皮</button>
           <button class="tool-btn" onclick="DrawApp.clearCanvas()">🗑️ 清空</button>
           <div class="size-slider">
             <span style="font-size:12px;color:var(--text2)">粗细</span>
-            <input type="range" min="1" max="20" value="3" oninput="DrawApp.setBrushSize(this.value)">
+            <div class="size-dots">
+              <div class="size-dot active" data-size="3" style="width:8px;height:8px" onclick="selectSize(this,3)"></div>
+              <div class="size-dot" data-size="6" style="width:12px;height:12px" onclick="selectSize(this,6)"></div>
+              <div class="size-dot" data-size="9" style="width:16px;height:16px" onclick="selectSize(this,9)"></div>
+              <div class="size-dot" data-size="14" style="width:20px;height:20px" onclick="selectSize(this,14)"></div>
+              <div class="size-dot" data-size="20" style="width:24px;height:24px" onclick="selectSize(this,20)"></div>
+            </div>
           </div>
+          <button class="landscape-btn" onclick="toggleLandscape()">🔄 横屏画</button>
         </div>
+        <button class="landscape-exit-btn" id="landscapeExitBtn" onclick="toggleLandscape()">✕ 退出横屏</button>
       </div>
       <div class="sidebar">
         <h3>✨ 发布你的鱼</h3>
@@ -220,35 +86,34 @@
           <input type="text" id="childAge" placeholder="如：6岁" maxlength="10">
         </div>
         <div style="text-align:center;margin:16px 0">
-          <canvas id="previewCanvas" width="200" height="100"
-                  style="width:100%;max-width:300px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#fff"></canvas>
+          <canvas id="previewCanvas" width="200" height="100" style="width:100%;max-width:300px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#fff"></canvas>
           <div style="font-size:12px;color:var(--text2);margin-top:4px">实时预览</div>
         </div>
         <button class="submit-btn" id="submitBtn" onclick="submitFish()" disabled>🌊 放归大海</button>
-        <p style="font-size:12px;color:#7a9bb5;text-align:center;margin-top:6px" id="submitHint">画一条能被识别的鱼才能发布</p>
+        <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:6px" id="submitHint">画一条能被识别的鱼才能发布</p>
         <div class="tips">
           <strong>🎯 小贴士：</strong><br>
-              • 尽量画完整的鱼身<br>
+          • 尽量画完整的鱼身<br>
           • 可以加鱼鳍、鱼鳞、泡泡<br>
           • 创意无限，什么鱼都可以！
         </div>
       </div>
     </div>
 
-    <!-- AI Comment Section (hidden by default) -->
-    <div id="stepComment">
+    <!-- AI Comment -->
+    <div id="stepComment" style="display:none">
       <div class="comment-section" id="commentSection">
         <h3>🎨 小艺术家点评</h3>
         <div class="subtitle" id="commentChildName"></div>
         <div class="comment-text" id="commentText"></div>
         <div class="radar" id="radarContainer"></div>
         <div class="phone-section">
-          <p>📱 输入手机号，获取完整美育测评报告</p>
+          <p>📱 AI时代，培养孩子的审美和品味尤为重要，<br>一键预约线上免费审美测评</p>
           <div class="phone-input-group">
             <input type="tel" id="phoneInput" placeholder="手机号" maxlength="11">
-            <button onclick="savePhone()">获取报告</button>
+            <button onclick="savePhone()">预约测评</button>
           </div>
-          <p style="font-size:12px;color:var(--text3);margin-top:6px">👆 自愿填写，用于接收孩子的美术测评报告</p>
+          <p style="font-size:12px;color:var(--text3);margin-top:6px">👆 老师会加微信，沟通测评时间</p>
         </div>
         <a href="/" class="go-to-tank-btn">🌊 去水族箱看看</a>
       </div>
@@ -257,36 +122,62 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
   <script src="/js/draw.js"></script>
   <script>
     // ─── State ───
     const urlParams = new URLSearchParams(window.location.search);
     const activityCode = urlParams.get('activity');
-    let currentMode = null;
-    let photoDataUrl = null;
-    let croppedDataUrl = null;
-    let mediaStream = null;
     let publishedFishId = null;
     let activityInfo = null;
+    let selectedInstitutionId = null;
+    let selectedInstitutionName = '';
+    let isLandscape = false;
 
+    // ─── Activity ───
     if (activityCode) {
-      fetch(`/api/activity/${activityCode}`).then(r => r.json()).then(d => { activityInfo = d; }).catch(() => {});
+      fetch(`/api/activity/${activityCode}`).then(r => r.json()).then(d => {
+        activityInfo = d;
+        selectedInstitutionId = d.institution_id;
+        selectedInstitutionName = d.institution_name || d.name;
+        document.getElementById('instBanner').style.display = 'flex';
+        document.getElementById('selectedInstName').textContent = selectedInstitutionName;
+        document.getElementById('stepCanvas').style.display = 'flex';
+        DrawApp.init('drawCanvas');
+      }).catch(() => {});
     }
 
     function getActivityParams() {
       const p = {};
-      if (activityInfo) {
-        p.institution_id = activityInfo.institution_id;
-        p.activity_id = activityInfo.id;
-      }
+      if (activityInfo) { p.institution_id = activityInfo.institution_id; p.activity_id = activityInfo.id; }
+      else if (selectedInstitutionId) { p.institution_id = selectedInstitutionId; }
       return p;
     }
 
-    // ─── Init canvas on page load (always visible) ───
+    function showInstitutionPicker() {
+      document.getElementById('institutionPicker').style.display = 'flex';
+      document.getElementById('stepCanvas').style.display = 'none';
+      document.getElementById('stepComment').style.display = 'none';
+      const listEl = document.getElementById('instList');
+      if (listEl.querySelector('.loading')) loadInstitutions();
+    }
 
-    window.addEventListener('load', () => {
+    function selectInstitution(id, name) {
+      selectedInstitutionId = id;
+      selectedInstitutionName = name;
+      document.getElementById('institutionPicker').style.display = 'none';
+      document.getElementById('stepCanvas').style.display = 'flex';
+      document.getElementById('instBanner').style.display = 'flex';
+      document.getElementById('selectedInstName').textContent = name;
       DrawApp.init('drawCanvas');
-      // Preview update interval
+      window.scrollTo(0, 0);
+    }
+
+    // ─── Init ───
+    window.addEventListener('load', () => {
+      if (!activityCode) {
+        loadInstitutions();
+      }
       setInterval(() => {
         const preview = document.getElementById('previewCanvas');
         const mc = DrawApp.canvas;
@@ -298,156 +189,38 @@
       }, 500);
     });
 
-    // ─── Mode selection ───
-
-    function chooseMode(mode) {
-      currentMode = mode;
-      document.getElementById('modeOverlay').classList.add('hidden');
-      if (mode === 'camera') {
-        document.getElementById('stepCamera').style.display = 'block';
-        startCamera();
-      }
-    }
-
-    function backToMode() {
-      stopCamera();
-      document.getElementById('modeOverlay').classList.remove('hidden');
-      document.getElementById('stepCamera').style.display = 'none';
-      document.getElementById('stepCrop').style.display = 'none';
-    }
-
-    function backToCamera() {
-      document.getElementById('stepCrop').style.display = 'none';
-      document.getElementById('stepCamera').style.display = 'block';
-      startCamera();
-    }
-
-    // ─── Camera ───
-
-    async function startCamera() {
+    async function loadInstitutions() {
+      document.getElementById('institutionPicker').style.display = 'flex';
+      const listEl = document.getElementById('instList');
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        document.getElementById('cameraPreview').srcObject = mediaStream;
+        const res = await fetch('/api/institutions');
+        const list = await res.json();
+        if (list.length === 0) {
+          listEl.innerHTML = '<div style="padding:20px;color:var(--text2)">暂无可选机构，请先联系管理员注册</div>';
+          return;
+        }
+        listEl.innerHTML = list.map(inst =>
+          `<button class="inst-option" onclick="selectInstitution('${inst.id}', '${escHtml(inst.name)}')">
+            <span class="icon">🏫</span>
+            <span class="info"><span class="name">${escHtml(inst.name)}</span></span>
+          </button>`
+        ).join('');
       } catch (e) {
-        showToast('无法打开摄像头，请选择照片上传');
+        listEl.innerHTML = '<div style="padding:20px;color:var(--text2)">加载失败，<a href="#" onclick="location.reload()">重试</a></div>';
       }
     }
 
-    function stopCamera() {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(t => t.stop());
-        mediaStream = null;
-      }
-    }
-
-    function takePhoto() {
-      const video = document.getElementById('cameraPreview');
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
-      canvas.getContext('2d').drawImage(video, 0, 0);
-      photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      stopCamera();
-      goToCrop();
-    }
-
-    function selectFromAlbum() {
-      document.getElementById('fileInput').click();
-    }
-
-    function onFileSelected(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        photoDataUrl = ev.target.result;
-        stopCamera();
-        goToCrop();
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // ─── Crop & Fish Detection ───
-
-    function goToCrop() {
-      document.getElementById('stepCamera').style.display = 'none';
-      document.getElementById('stepCrop').style.display = 'block';
-      document.getElementById('cropImage').src = photoDataUrl;
-      detectFish(photoDataUrl);
-    }
-
-    function detectFish(imageData) {
-      return new Promise(resolve => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-          let nonWhite = 0, total = pixels.length / 4;
-          let leftNonWhite = 0, rightNonWhite = 0;
-          const w = canvas.width, h = canvas.height;
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const i = (y * w + x) * 4;
-              const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
-              if (!(r > 240 && g > 240 && b > 240)) {
-                nonWhite++;
-                if (x < w * 0.3) leftNonWhite++;
-                else if (x > w * 0.7) rightNonWhite++;
-              }
-            }
-          }
-          const aspectRatio = w / h;
-          const fillRatio = nonWhite / total * 100;
-          const asymmetry = leftNonWhite > 0 && rightNonWhite > 0
-            ? Math.abs(leftNonWhite - rightNonWhite) / Math.max(leftNonWhite, rightNonWhite) * 100 : 0;
-          let confidence = 0;
-          if (aspectRatio > 1.2) confidence += 25;
-          if (fillRatio >= 5 && fillRatio <= 50) confidence += 25;
-          if (asymmetry > 20) confidence += 30;
-          if (nonWhite > 200) confidence += 20;
-          confidence = Math.min(confidence, 100);
-          const passed = confidence >= 60;
-          const el = document.getElementById('detectionResult');
-          if (passed) {
-            el.className = 'detection-result pass';
-            el.textContent = '✅ 识别为鱼（置信度 ' + confidence + '%）';
-            document.getElementById('confirmPhotoBtn').disabled = false;
-          } else {
-            el.className = 'detection-result fail';
-            el.textContent = '❌ 没认出是鱼，再试试（置信度 ' + confidence + '%）';
-            document.getElementById('confirmPhotoBtn').disabled = true;
-          }
-          resolve(passed);
-        };
-        img.src = imageData;
-      });
-    }
-
-    async function confirmPhoto() {
-      croppedDataUrl = photoDataUrl;
-      document.getElementById('stepCrop').style.display = 'none';
-      const processed = await trimImage(croppedDataUrl);
-      doPublish(processed);
-    }
-
-    // ─── Publish ───
-
+    // ─── Submit ───
     async function submitFish() {
       const childName = document.getElementById('childName').value.trim();
       const age = document.getElementById('childAge').value.trim();
-      const btn = document.getElementById('submitBtn');
       if (!childName) { showToast('请输入孩子昵称'); return; }
       if (DrawApp.fishConfidence < 60) { showToast('画一条能被识别的鱼！'); return; }
       let imageData = DrawApp.getImageData();
       const empty = await isCanvasEmpty(imageData);
       if (empty) { showToast('先画一条鱼吧！'); return; }
       imageData = await trimImage(imageData);
+      const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.textContent = '🐟 正在放归大海...';
       await doPublish(imageData, childName, age);
@@ -459,7 +232,6 @@
       const instName = activityInfo ? activityInfo.institution_name || activityInfo.name : '';
       const fishName = instName ? instName + '_' + childName + '的鱼' : (childName || '小画家') + '的鱼';
       const actParams = getActivityParams();
-      const deviceId = getDeviceId();
       try {
         const res = await fetch('/api/fish', {
           method: 'POST',
@@ -469,7 +241,7 @@
             age: age, image_data: imageData,
             institution_id: actParams.institution_id || null,
             activity_id: actParams.activity_id || null,
-            device_id: deviceId
+            device_id: getDeviceId()
           })
         });
         const data = await res.json();
@@ -492,15 +264,12 @@
     // ─── AI Comment ───
 
     function showAIComment(childName, age) {
-      // Hide canvas and camera sections
       document.getElementById('stepCanvas').style.display = 'none';
-      document.getElementById('stepCamera').style.display = 'none';
-      document.getElementById('stepCrop').style.display = 'none';
-      stopCamera();
-      // Show comment
+      document.getElementById('stepComment').style.display = 'block';
       const section = document.getElementById('commentSection');
       section.style.display = 'block';
-      document.getElementById('commentChildName').textContent = childName + '，你画的鱼真棒！';
+      const greeting = age ? childName + '（' + age + '）' : childName;
+      document.getElementById('commentChildName').textContent = greeting + '，来看看你的评语：';
       const comment = generateComment();
       document.getElementById('commentText').textContent = comment.text;
       const radar = document.getElementById('radarContainer');
@@ -514,20 +283,69 @@
     }
 
     function generateComment() {
-      const templates = [
-        { text: '色彩鲜艳，搭配丰富！画面中用了多种颜色组合，展现出大胆的用色能力。鱼身造型完整，线条流畅自然。特别有创意的是给鱼加了独特的装饰元素，想象力丰富！继续保持！', scores: [80, 65, 90, 55] },
-        { text: '哇！这条鱼的色彩搭配很和谐，暖色调和冷色调的运用恰到好处。鱼鳍和鱼尾的线条处理得很生动，能看出对细节的观察很仔细。整体画面干净整洁，是一幅很棒的作品！', scores: [75, 70, 75, 70] },
-        { text: '非常有想象力的一条鱼！用了很大胆的色彩，说明对颜色有很好的感知力。鱼身比例协调，基本造型掌握得不错。如果在鱼鳞和鱼鳍上再加一些细节会更棒哦！', scores: [85, 55, 85, 45] },
-        { text: '简洁有力的造型风格！虽然没有太多复杂的线条，但鱼的形态特征抓得很准。色彩选择很有个性，展现出独特的审美视角。继续加油，你会越来越棒的！', scores: [65, 75, 70, 50] },
-        { text: '画面充满活力！颜色的运用非常丰富，而且搭配得很有层次感。鱼的眼睛和鱼鳍都画得很细致，观察力很强。整体构图完整，是一幅很用心的创作！', scores: [85, 80, 80, 75] }
+      // Analyze actual drawing on canvas
+      const canvas = DrawApp.canvas;
+      let colorCount = 0, totalPx = 0, colorSet = new Set();
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        // Sample at stride to keep it fast
+        const step = 4;
+        const data = ctx.getImageData(0, 0, w, h).data;
+        for (let y = 0; y < h; y += step) {
+          for (let x = 0; x < w; x += step) {
+            const i = (y * w + x) * 4;
+            if (data[i+3] > 128) {
+              totalPx++;
+              const r = data[i], g = data[i+1], b = data[i+2];
+              // Merge dark/near-black pixels to avoid anti-alias artifacts
+              if (r < 60 && g < 60 && b < 60) {
+                colorSet.add('k');
+              } else {
+                // Coarse quantization to merge similar colors
+                const q = 80;
+                colorSet.add(`${Math.round(r/q)*q},${Math.round(g/q)*q},${Math.round(b/q)*q}`);
+              }
+            }
+          }
+        }
+        colorCount = colorSet.size;
+      }
+
+      const isDetailed = totalPx > 3000;
+      const isSimple = totalPx < 800;
+      const isColorful = colorCount >= 4;
+      const isMono = colorCount <= 1;
+
+      // Build comment from actual observations
+      let parts = [];
+
+      if (isSimple) parts.push('画风简洁有力，鱼的基本轮廓很清晰');
+      else if (isDetailed) parts.push('画得很用心，画面内容很丰富');
+      else parts.push('鱼的形态抓得不错，造型完整');
+
+      parts.push('继续加油，越画越好！');
+
+      const text = parts.join('。') + '🎉';
+
+      // Generate realistic scores based on actual drawing
+      const baseShape = Math.min(90, 50 + totalPx * 0.02);
+      const baseColor = isColorful ? 75 : isMono ? 50 : 65;
+      const baseCreative = isDetailed ? 75 : isSimple ? 60 : 65;
+      const baseDetail = isDetailed ? 80 : isSimple ? 40 : 55;
+
+      const jitter = () => Math.floor(Math.random() * 10) - 5;
+      const scores = [
+        Math.max(10, Math.min(100, Math.round(baseColor + jitter()))),
+        Math.max(10, Math.min(100, Math.round(baseShape + jitter()))),
+        Math.max(10, Math.min(100, Math.round(baseCreative + jitter()))),
+        Math.max(10, Math.min(100, Math.round(baseDetail + jitter()))),
       ];
-      const t = templates[Math.floor((Date.now() % 7 + (publishedFishId || '').length) % templates.length)];
-      const jittered = t.scores.map(s => Math.max(10, Math.min(100, s + Math.floor(Math.random() * 10) - 5)));
-      return { text: t.text, scores: jittered };
+
+      return { text, scores };
     }
 
     // ─── Phone ───
-
     async function savePhone() {
       const phone = document.getElementById('phoneInput').value.trim();
       if (!phone || phone.length < 11) { showToast('请输入正确的手机号'); return; }
@@ -537,15 +355,12 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone })
         });
-        showToast('✅ 已保存，报告将发送到您的手机');
+        showToast('✅ 已保存，老师会尽快联系您');
         document.getElementById('phoneInput').value = '';
-      } catch (e) {
-        showToast('保存成功！');
-      }
+      } catch (e) { showToast('保存成功！'); }
     }
 
     // ─── Image utilities ───
-
     function trimImage(dataUrl) {
       return new Promise(resolve => {
         const img = new Image();
@@ -554,43 +369,35 @@
           src.width = img.width; src.height = img.height;
           const sCtx = src.getContext('2d');
           sCtx.drawImage(img, 0, 0);
-          const data = sCtx.getImageData(0, 0, src.width, src.height);
-          const px = data.data;
+          const px = sCtx.getImageData(0, 0, src.width, src.height).data;
           const T = 245;
           let minX = src.width, minY = src.height, maxX = 0, maxY = 0;
           for (let y = 0; y < src.height; y++) {
             for (let x = 0; x < src.width; x++) {
               const i = (y * src.width + x) * 4;
-              const r = px[i], g = px[i+1], b = px[i+2], a = px[i+3];
-              if (a > 0 && (r < T || g < T || b < T)) {
-                if (x < minX) minX = x;
-                if (x > maxX) maxX = x;
-                if (y < minY) minY = y;
-                if (y > maxY) maxY = y;
+              if (px[i+3] > 0 && (px[i] < T || px[i+1] < T || px[i+2] < T)) {
+                if (x < minX) minX = x; if (x > maxX) maxX = x;
+                if (y < minY) minY = y; if (y > maxY) maxY = y;
               }
             }
           }
           if (maxX < minX || maxY < minY) { resolve(dataUrl); return; }
           const pad = 6;
-          minX = Math.max(0, minX - pad);
-          minY = Math.max(0, minY - pad);
-          maxX = Math.min(src.width - 1, maxX + pad);
-          maxY = Math.min(src.height - 1, maxY + pad);
+          minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
+          maxX = Math.min(src.width - 1, maxX + pad); maxY = Math.min(src.height - 1, maxY + pad);
           const w = maxX - minX + 1, h = maxY - minY + 1;
           const out = document.createElement('canvas');
           out.width = w; out.height = h;
           const oCtx = out.getContext('2d');
           const outData = oCtx.createImageData(w, h);
-          const outPx = outData.data;
           for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
               const si = ((minY + y) * src.width + (minX + x)) * 4;
               const di = (y * w + x) * 4;
-              const r = px[si], g = px[si+1], b = px[si+2], a = px[si+3];
-              if (r > T && g > T && b > T) {
-                outPx[di] = 0; outPx[di+1] = 0; outPx[di+2] = 0; outPx[di+3] = 0;
+              if (px[si] > T && px[si+1] > T && px[si+2] > T) {
+                outData.data[di] = 0; outData.data[di+1] = 0; outData.data[di+2] = 0; outData.data[di+3] = 0;
               } else {
-                outPx[di] = r; outPx[di+1] = g; outPx[di+2] = b; outPx[di+3] = a;
+                outData.data[di] = px[si]; outData.data[di+1] = px[si+1]; outData.data[di+2] = px[si+2]; outData.data[di+3] = px[si+3];
               }
             }
           }
@@ -610,42 +417,68 @@
           canvas.width = img.width; canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
           const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-          let hasDrawing = false;
           for (let i = 0; i < data.length; i += 4) {
-            if (data[i+3] > 0 && (data[i] < 240 || data[i+1] < 240 || data[i+2] < 240)) {
-              hasDrawing = true; break;
-            }
+            if (data[i+3] > 0 && (data[i] < 240 || data[i+1] < 240 || data[i+2] < 240)) return resolve(false);
           }
-          resolve(!hasDrawing);
+          resolve(true);
         };
         img.src = dataUrl;
       });
     }
 
     // ─── Utilities ───
-
     function getDeviceId() {
       let id = localStorage.getItem('deviceId');
-      if (!id) {
-        id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
-        localStorage.setItem('deviceId', id);
-      }
+      if (!id) { id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10); localStorage.setItem('deviceId', id); }
       return id;
     }
 
     function showToast(msg) {
       const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
+      t.textContent = msg; t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2000);
     }
+
+    function escHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+    function selectSize(el, size) {
+      DrawApp.setBrushSize(size);
+      document.querySelectorAll('.size-dot').forEach(d => d.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    // ─── Landscape mode ───
+    function toggleLandscape() {
+      isLandscape = !isLandscape;
+      DrawApp.isLandscape = isLandscape;
+      const page = document.getElementById('stepCanvas');
+      const exitBtn = document.getElementById('landscapeExitBtn');
+      if (isLandscape) {
+        page.classList.add('landscape-mode');
+        exitBtn.style.display = 'block';
+        DrawApp.saveState();
+        setTimeout(() => { DrawApp.setupCanvas(); DrawApp.restoreRotated(90); }, 100);
+      } else {
+        page.classList.remove('landscape-mode');
+        exitBtn.style.display = 'none';
+        DrawApp.saveState();
+        setTimeout(() => { DrawApp.setupCanvas(); DrawApp.restoreRotated(-90); }, 100);
+      }
+    }
+
+    window.addEventListener('orientationchange', () => {
+      if (screen.orientation && screen.orientation.type.startsWith('landscape')) {
+        if (!isLandscape) toggleLandscape();
+      } else {
+        if (isLandscape) toggleLandscape();
+      }
+    });
 
     // ─── Bubbles ───
     (function() {
       const c = document.getElementById('bubbles');
       for (let i = 0; i < 20; i++) {
-        const b = document.createElement('div');
-        b.className = 'bubble';
+        const b = document.createElement('div'); b.className = 'bubble';
         const s = 4 + Math.random() * 16;
         b.style.width = s + 'px'; b.style.height = s + 'px';
         b.style.left = Math.random() * 100 + '%';

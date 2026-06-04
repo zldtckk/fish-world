@@ -3,229 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>画鱼 - 少儿美术地推活动</title>
-  <link rel="stylesheet" href="/styles.css">
+  <title>大家一起来画鱼</title>
+  <link rel="stylesheet" href="/styles.css?v=2">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-  <style>
-    /* Activity hero */
-    .activity-hero {
-      text-align: center;
-      padding: 24px 20px 16px;
-    }
-    .activity-hero .inst-name {
-      font-size: 14px;
-      color: var(--accent);
-      font-weight: 500;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    .activity-hero h1 {
-      font-size: 32px;
-      font-weight: 700;
-      margin: 4px 0 8px;
-    }
-    .draw-btn-wrap { text-align: center; margin: 16px 0 20px; }
-    .draw-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 16px 40px;
-      border-radius: 50px;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), #6ecff0);
-      color: #fff;
-      font-size: 20px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      text-decoration: none;
-      box-shadow: 0 6px 24px rgba(74,184,232,0.35);
-      transition: all 0.25s;
-    }
-    .draw-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 32px rgba(74,184,232,0.45); }
-    .draw-btn:active { transform: scale(0.97); }
-
-    /* Stats bar */
-    .stats-bar {
-      display: flex;
-      justify-content: center;
-      gap: 28px;
-      margin: 8px 0 20px;
-      flex-wrap: wrap;
-    }
-    .stats-bar .item { text-align: center; }
-    .stats-bar .num {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent-dark);
-    }
-    .stats-bar .lbl {
-      font-size: 12px;
-      color: var(--text2);
-    }
-
-    /* Section tabs */
-    .section-tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 16px;
-      border-bottom: 2px solid rgba(74,184,232,0.1);
-    }
-    .section-tabs button {
-      flex: 1;
-      padding: 10px 16px;
-      border: none;
-      background: none;
-      color: var(--text2);
-      font-size: 15px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      transition: all 0.2s;
-    }
-    .section-tabs button.active {
-      color: var(--accent-dark);
-      border-bottom-color: var(--accent);
-    }
-
-    /* Ranking list */
-    .rank-list { margin-bottom: 24px; }
-    .rank-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 16px;
-      background: var(--surface);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      border: 1px solid rgba(74,184,232,0.08);
-      transition: all 0.2s;
-    }
-    .rank-item:hover { border-color: rgba(74,184,232,0.2); }
-    .rank-num {
-      width: 28px;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text2);
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .rank-num.gold { color: #f5a623; }
-    .rank-num.silver { color: #a8b8c8; }
-    .rank-num.bronze { color: #cd7f32; }
-    .rank-info { flex: 1; margin-left: 12px; }
-    .rank-info .name {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .rank-info .sub {
-      font-size: 12px;
-      color: var(--text2);
-      margin-top: 2px;
-    }
-    .rank-votes {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--accent-dark);
-      flex-shrink: 0;
-    }
-    .rank-votes small { font-size: 12px; font-weight: 400; color: var(--text2); }
-
-    /* My fish highlight */
-    .my-fish-highlight {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, rgba(74,184,232,0.08), rgba(74,184,232,0.03));
-      border: 1px solid rgba(74,184,232,0.2) !important;
-      border-radius: 10px;
-      padding: 10px 14px;
-      margin-bottom: 12px;
-    }
-    .my-fish-highlight .fish-icon { font-size: 28px; }
-    .my-fish-highlight .info { flex: 1; }
-    .my-fish-highlight .info .name { font-weight: 600; color: var(--accent-dark); }
-    .my-fish-highlight .info .votes { font-size: 13px; color: var(--text2); }
-    .my-fish-highlight .share-btn {
-      padding: 6px 14px;
-      border-radius: 16px;
-      border: 1px solid var(--accent);
-      background: transparent;
-      color: var(--accent-dark);
-      font-size: 12px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    /* Share modal */
-    .share-modal p { text-align: center; color: var(--text2); margin: 8px 0 16px; font-size: 14px; }
-    .share-link-box {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 13px;
-      word-break: break-all;
-      text-align: center;
-      margin-bottom: 12px;
-      border: 1px solid rgba(74,184,232,0.1);
-    }
-    .share-btn-copy {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    /* Fish in aquarium modal */
-    .modal-fish-img {
-      max-width: 100%;
-      max-height: 200px;
-      display: block;
-      margin: 12px auto;
-    }
-    .modal-detail-name { font-size: 20px; text-align: center; font-weight: 600; }
-    .modal-detail-sub { text-align: center; color: var(--text2); font-size: 13px; margin-bottom: 8px; }
-    .modal-vote-area { text-align: center; margin: 12px 0; }
-    .modal-vote-btn {
-      padding: 10px 28px;
-      border-radius: 24px;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
-    .modal-vote-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .modal-vote-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(74,184,232,0.35); }
-    .modal-voted-msg { color: var(--text2); font-size: 14px; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .activity-hero h1 { font-size: 24px; }
-      .draw-btn { padding: 14px 28px; font-size: 17px; }
-      .stats-bar { gap: 16px; }
-    }
-  </style>
 </head>
 <body>
   <div class="ocean-bg"></div>
   <div class="bubbles" id="bubbles"></div>
 
   <header>
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <a href="/" class="logo">🐟 画鱼</a>
+    <div class="container header-inner">
+      <a href="/" class="logo">🐟 大家一起来画鱼</a>
       <nav>
         <a href="/" class="nav-btn active">水族箱</a>
         <a href="/draw.html" class="nav-btn primary">✏️ 我也要画</a>
@@ -234,7 +22,6 @@
   </header>
 
   <main class="container">
-    <!-- Activity Hero -->
     <section class="activity-hero" id="activityHero">
       <div class="inst-name" id="instName" style="display:none"></div>
       <h1 id="activityName">🌊 全球水族箱</h1>
@@ -248,14 +35,20 @@
       </div>
     </section>
 
-    <!-- Aquarium -->
     <section class="aquarium-section">
       <div class="section-header">
         <h2>🌊 水族箱</h2>
         <span style="font-size:13px;color:var(--text2);cursor:pointer" onclick="location.reload()">🔄 刷新</span>
       </div>
-      <div style="text-align:right;font-size:13px;color:var(--text3);margin-bottom:6px">
-        💡 点击鱼查看详情 · 右键撒饲料 · 自己的鱼有 ✨ 高亮
+      <div class="aquarium-hint">
+        <span class="feed-hint">💡 点击鱼查看详情 · 双击撒饲料 · 自己的鱼有 ✨ 高亮</span>
+        <span class="fish-count-slider">
+          <span style="color:var(--text2);font-size:12px">🐟</span>
+          <input type="range" id="fishLimitSlider" min="20" max="200" value="50" step="10">
+          <span id="fishLimitLabel" style="font-size:12px;color:var(--text2);min-width:32px;display:inline-block">50</span>
+        </span>
+        <button class="feed-btn" onclick="Aquarium.feedCenter()">🫘 喂食</button>
+        <button class="feed-btn" onclick="toggleFullscreen()">⛶ 全屏</button>
       </div>
       <div class="aquarium-stage" id="aquariumStage">
         <div class="sea-floor"></div>
@@ -267,9 +60,9 @@
           <div>鱼群正在游来...</div>
         </div>
       </div>
+      <button class="fullscreen-exit-btn" id="fullscreenExitBtn" onclick="toggleFullscreen()">✕ 退出全屏</button>
     </section>
 
-    <!-- Rankings -->
     <section>
       <div class="section-tabs">
         <button class="active" data-rank="personal">🏆 个人榜</button>
@@ -311,20 +104,19 @@
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <script src="/aquarium.js"></script>
+  <script src="/aquarium.js?v=2"></script>
   <script>
-    // ─── Activity state ───
+    // ─── State ───
     const params = new URLSearchParams(window.location.search);
     const activityCode = params.get('activity');
     let activityInfo = null;
     let myFishId = localStorage.getItem('myFishId');
-    let votedToday = {};  // fishId → true
+    let votedToday = {};
+    let currentFishId = null;
 
     // ─── Init ───
-
     window.addEventListener('load', async () => {
       createBubbles();
       createSeaweed();
@@ -335,7 +127,6 @@
     });
 
     // ─── Activity ───
-
     async function loadActivity() {
       if (!activityCode) return;
       try {
@@ -344,7 +135,6 @@
         document.getElementById('instName').textContent = '🏫 ' + activityInfo.institution_name;
         document.getElementById('instName').style.display = 'block';
         document.getElementById('activityName').textContent = '🌊 ' + activityInfo.name;
-        // Update draw links with activity
         document.querySelectorAll('a[href="/draw.html"]').forEach(a => {
           a.href = '/draw.html?activity=' + encodeURIComponent(activityCode);
         });
@@ -352,30 +142,25 @@
     }
 
     // ─── Stats ───
-
     async function loadStats() {
       try {
-        const url = activityCode ? `/api/stats?activity=${encodeURIComponent(activityCode)}` : '/api/stats';
+        const actId = activityInfo?.id || activityCode;
+        const url = actId ? `/api/stats?activity=${encodeURIComponent(actId)}` : '/api/stats';
         const res = await fetch(url);
         const s = await res.json();
         document.getElementById('statFish').textContent = s.totalFish;
         document.getElementById('statVotes').textContent = s.totalVotes;
-        // For people count, fetch individual rank count
-        const rankRes = await fetch(activityCode ? `/api/rank/individual?activity=${encodeURIComponent(activityCode)}&limit=1` : '/api/rank/individual?limit=1');
-        const rankData = await rankRes.json();
-        document.getElementById('statPeople').textContent = rankData.total || s.totalFish;
       } catch (e) {}
     }
 
     // ─── Rankings ───
-
     async function loadRank(type) {
       const container = document.getElementById('rankContent');
       container.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
-
       try {
         if (type === 'personal') {
-          const url = activityCode ? `/api/rank/individual?activity=${encodeURIComponent(activityCode)}` : '/api/rank/individual';
+          const actId = activityInfo?.id || activityCode;
+          const url = actId ? `/api/rank/individual?activity=${encodeURIComponent(actId)}` : '/api/rank/individual';
           const res = await fetch(url);
           const data = await res.json();
           renderPersonalRank(container, data.list);
@@ -394,37 +179,17 @@
         container.innerHTML = '<div class="empty-state"><div class="big-icon">🐟</div><h3>还没有鱼</h3><p>快来画第一条鱼吧！</p></div>';
         return;
       }
-
       let html = '<div class="rank-list">';
-
-      // My fish highlight
       if (myFishId) {
         const mine = list.find(f => f.id === myFishId);
         if (mine) {
-          html += `
-            <div class="my-fish-highlight">
-              <div class="fish-icon">🐟</div>
-              <div class="info">
-                <div class="name">✨ ${escHtml(mine.name)}</div>
-                <div class="votes">⭐ ${mine.votes} 赞 · 排名 #${mine.rank}</div>
-              </div>
-              <button class="share-btn" onclick="openShareModal('${mine.id}')">📤 分享</button>
-            </div>`;
+          html += '<div class="my-fish-highlight"><div class="fish-icon">🐟</div><div class="info"><div class="name">✨ ' + escHtml(mine.name) + '</div><div class="votes">⭐ ' + mine.votes + ' 赞 · 排名 #' + mine.rank + '</div></div><button class="share-btn" onclick="openShareModal(\'' + mine.id + '\')">📤 分享</button></div>';
         }
       }
-
       list.forEach(f => {
-        const cls = f.rank === 1 ? 'gold' : f.rank === 2 ? 'silver' : f.rank === 3 ? 'bronze' : '';
         const medal = f.rank === 1 ? '🥇' : f.rank === 2 ? '🥈' : f.rank === 3 ? '🥉' : '';
-        html += `
-          <div class="rank-item" onclick="openFishModal('${f.id}')">
-            <div class="rank-num ${cls}">${medal || f.rank}</div>
-            <div class="rank-info">
-              <div class="name">${escHtml(f.name)}</div>
-              <div class="sub">${escHtml(f.child_name || f.author)}${f.institution_name ? ' · ' + escHtml(f.institution_name) : ''}</div>
-            </div>
-            <div class="rank-votes">${f.votes} <small>赞</small></div>
-          </div>`;
+        const cls = f.rank === 1 ? 'gold' : f.rank === 2 ? 'silver' : f.rank === 3 ? 'bronze' : '';
+        html += '<div class="rank-item" onclick="openFishModal(\'' + f.id + '\')"><div class="rank-num ' + cls + '">' + (medal || f.rank) + '</div><div class="rank-info"><div class="name">' + escHtml(f.name) + '</div><div class="sub">' + escHtml(f.child_name || f.author) + (f.institution_name ? ' · ' + escHtml(f.institution_name) : '') + '</div></div><div class="rank-votes">' + f.votes + ' <small>赞</small></div></div>';
       });
       html += '</div>';
       container.innerHTML = html;
@@ -435,25 +200,15 @@
         container.innerHTML = '<div class="empty-state"><div class="big-icon">🏫</div><h3>还没有机构</h3></div>';
         return;
       }
-
       let html = '<div class="rank-list">';
       list.forEach(inst => {
         const medal = inst.rank === 1 ? '🥇' : inst.rank === 2 ? '🥈' : inst.rank === 3 ? '🥉' : '';
-        html += `
-          <div class="rank-item">
-            <div class="rank-num ${inst.rank === 1 ? 'gold' : inst.rank === 2 ? 'silver' : inst.rank === 3 ? 'bronze' : ''}">${medal || inst.rank}</div>
-            <div class="rank-info">
-              <div class="name">${escHtml(inst.name)}</div>
-              <div class="sub">👶 ${inst.participant_count || inst.fish_count} 位小画家</div>
-            </div>
-            <div class="rank-votes">${inst.total_votes} <small>赞</small></div>
-          </div>`;
+        const cls = inst.rank === 1 ? 'gold' : inst.rank === 2 ? 'silver' : inst.rank === 3 ? 'bronze' : '';
+        html += '<div class="rank-item"><div class="rank-num ' + cls + '">' + (medal || inst.rank) + '</div><div class="rank-info"><div class="name">' + escHtml(inst.name) + '</div><div class="sub">👶 ' + (inst.participant_count || inst.fish_count) + ' 位小画家</div></div><div class="rank-votes">' + inst.total_votes + ' <small>赞</small></div></div>';
       });
       html += '</div>';
       container.innerHTML = html;
     }
-
-    // ─── Tab switching ───
 
     document.querySelectorAll('.section-tabs button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -463,140 +218,158 @@
       });
     });
 
-    // ─── Fish Detail Modal ───
-
+    // ─── Fish Modal ───
     async function openFishModal(id) {
       currentFishId = id;
       const modal = document.getElementById('fishModal');
       modal.classList.add('open');
-
       try {
         const res = await fetch(`/api/fish/${id}`);
         const fish = await res.json();
-
         document.getElementById('modalFishName').textContent = fish.name;
         document.getElementById('modalFishSub').textContent = 'by ' + (fish.child_name || fish.author) + (fish.institution_name ? ' · ' + fish.institution_name : '');
         document.getElementById('modalFishImg').src = fish.image_data;
-        document.getElementById('modalVotes').textContent = fish.upvotes - fish.downvotes;
-
-        // Check if already voted
-        const deviceId = getDeviceId();
+        document.getElementById('modalVotes').textContent = (fish.upvotes || 0) - (fish.downvotes || 0);
         const today = new Date().toISOString().slice(0, 10);
-        const voteKey = id + '_' + today;
-        const alreadyVoted = votedToday[voteKey] || localStorage.getItem('voted_' + voteKey);
-
-        const voteBtn = document.getElementById('modalVoteBtn');
-        const votedMsg = document.getElementById('modalVotedMsg');
-        if (alreadyVoted) {
-          voteBtn.style.display = 'none';
-          votedMsg.style.display = 'block';
-        } else {
-          voteBtn.style.display = 'inline-block';
-          voteBtn.disabled = false;
-          voteBtn.textContent = '👍 点赞';
-          votedMsg.style.display = 'none';
-        }
-      } catch (e) {
-        showToast('加载失败');
-      }
+        const alreadyVoted = votedToday[id + '_' + today] || localStorage.getItem('voted_' + id + '_' + today);
+        document.getElementById('modalVoteBtn').style.display = alreadyVoted ? 'none' : 'inline-block';
+        document.getElementById('modalVotedMsg').style.display = alreadyVoted ? 'block' : 'none';
+        document.getElementById('modalVoteBtn').disabled = false;
+      } catch (e) { showToast('加载失败'); }
     }
 
-    function closeFishModal() {
-      document.getElementById('fishModal').classList.remove('open');
-      currentFishId = null;
-    }
+    function closeFishModal() { document.getElementById('fishModal').classList.remove('open'); currentFishId = null; }
 
     async function voteFish() {
       if (!currentFishId) return;
-      const deviceId = getDeviceId();
       const btn = document.getElementById('modalVoteBtn');
-      btn.disabled = true;
-      btn.textContent = '⏳ ...';
-
+      btn.disabled = true; btn.textContent = '⏳ ...';
       try {
         const res = await fetch(`/api/fish/${currentFishId}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ device_id: deviceId })
+          body: JSON.stringify({ device_id: getDeviceId() })
         });
-
         const data = await res.json();
         if (data.success) {
           const today = new Date().toISOString().slice(0, 10);
-          const voteKey = currentFishId + '_' + today;
-          votedToday[voteKey] = true;
-          localStorage.setItem('voted_' + voteKey, '1');
-
+          votedToday[currentFishId + '_' + today] = true;
+          localStorage.setItem('voted_' + currentFishId + '_' + today, '1');
           document.getElementById('modalVoteBtn').style.display = 'none';
           document.getElementById('modalVotedMsg').style.display = 'block';
-          document.getElementById('modalVotes').textContent = data.votes || data.upvotes;
-
+          document.getElementById('modalVotes').textContent = data.votes;
           loadStats();
-          // Refresh current rank tab
           const activeTab = document.querySelector('.section-tabs button.active');
-          loadRank(activeTab?.dataset.rank || 'personal');
+          if (activeTab) loadRank(activeTab.dataset.rank || 'personal');
           showToast('👍 点赞成功！');
         } else if (data.alreadyVoted) {
           showToast('今天已经点过赞了！');
           document.getElementById('modalVoteBtn').style.display = 'none';
           document.getElementById('modalVotedMsg').style.display = 'block';
-        } else {
-          showToast(data.error || '点赞失败');
-          btn.disabled = false;
-          btn.textContent = '👍 点赞';
-        }
-      } catch (e) {
-        showToast('网络错误');
-        btn.disabled = false;
-        btn.textContent = '👍 点赞';
-      }
+        } else { showToast(data.error || '点赞失败'); btn.disabled = false; btn.textContent = '👍 点赞'; }
+      } catch (e) { showToast('网络错误'); btn.disabled = false; btn.textContent = '👍 点赞'; }
     }
 
-    // ─── Share ───
-
     function openShareModal(fishId) {
-      const url = window.location.origin + '/?fish=' + fishId;
-      document.getElementById('shareLink').textContent = url;
+      document.getElementById('shareLink').textContent = window.location.origin + '/?fish=' + fishId;
       document.getElementById('shareModal').classList.add('open');
     }
 
     async function copyShareLink() {
       const text = document.getElementById('shareLink').textContent;
-      try {
-        await navigator.clipboard.writeText(text);
-        showToast('✅ 链接已复制！');
-      } catch {
-        // Fallback
-        const input = document.createElement('input');
-        input.value = text;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-        showToast('✅ 链接已复制！');
+      try { await navigator.clipboard.writeText(text); showToast('✅ 链接已复制！'); }
+      catch { const inp = document.createElement('input'); inp.value = text; document.body.appendChild(inp); inp.select(); document.execCommand('copy'); document.body.removeChild(inp); showToast('✅ 链接已复制！'); }
+    }
+
+    // ─── Fullscreen ───
+    function swapFishCoords() {
+      for (const [fishId, obj] of Aquarium.fishObjects) {
+        const { state } = obj;
+        const tmp = state.x;
+        state.x = state.y;
+        state.y = tmp;
+        state.targetY = state.y;
       }
     }
 
-    // ─── Aquarium (always shows ALL fish, not filtered by activity) ───
+    function toggleFullscreen() {
+      const stage = document.getElementById('aquariumStage');
+      // Mobile (including WeChat): just toggle the class, no Fullscreen API
+      if (window.innerWidth <= 768) {
+        if (!stage.classList.contains('-fullscreen')) {
+          swapFishCoords();
+          stage.classList.add('-fullscreen');
+        } else {
+          stage.classList.remove('-fullscreen');
+          swapFishCoords();
+        }
+        return;
+      }
+      // Desktop: use Fullscreen API
+      if (!document.fullscreenElement) {
+        stage.classList.add('-fullscreen');
+        if (stage.requestFullscreen) stage.requestFullscreen();
+        else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
 
-    async function initAquarium() {
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+
+    function onFsChange() {
+      // Desktop only: remove class when exiting fullscreen via ESC
+      if (window.innerWidth <= 768) return;
+      const stage = document.getElementById('aquariumStage');
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        stage.classList.remove('-fullscreen');
+      }
+    }
+
+    // ─── Aquarium ───
+    let _fishLimit = 50;
+
+    async function loadFish(limit) {
+      _fishLimit = limit || _fishLimit;
       const loading = document.getElementById('aquariumLoading');
+      loading.style.display = '';
+      loading.innerHTML = '<div class="spinner"></div><div>鱼群正在游来...</div>';
       try {
-        const res = await fetch('/api/fish?sort=new&limit=20');
+        const res = await fetch(`/api/fish?sort=random&limit=${_fishLimit}`);
         const data = await res.json();
-
         if (data.fish.length === 0) {
           loading.innerHTML = '<div style="margin-top:60px">🐟 <br>水族箱还是空的<br><small style="color:var(--text2)">去画一条鱼吧！</small></div>';
           return;
         }
-
-        loading.remove();
-        await Aquarium.loadFishIntoAquarium();
+        loading.style.display = 'none';
+        await Aquarium.loadFishIntoAquarium(data.fish);
         highlightMyFish();
-      } catch (e) {
-        loading.innerHTML = '<div>加载失败</div>';
-      }
+      } catch (e) { loading.innerHTML = '<div>加载失败，<a href="#" onclick="location.reload()">点击刷新</a></div>'; }
     }
+
+    async function initAquarium() {
+      const loading = document.getElementById('aquariumLoading');
+      const failTimer = setTimeout(() => { loading.innerHTML = '<div>⏳ 加载超时，<a href="#" onclick="location.reload()">点击刷新</a></div>'; }, 15000);
+      try {
+        await loadFish(50);
+        clearTimeout(failTimer);
+      } catch (e) { clearTimeout(failTimer); loading.innerHTML = '<div>加载失败，<a href="#" onclick="location.reload()">点击刷新</a></div>'; }
+    }
+
+    document.getElementById('fishLimitSlider').addEventListener('input', function() {
+      document.getElementById('fishLimitLabel').textContent = this.value;
+    });
+
+    let _reloadTimer = null;
+    document.getElementById('fishLimitSlider').addEventListener('change', function() {
+      clearTimeout(_reloadTimer);
+      _reloadTimer = setTimeout(() => {
+        Aquarium.clear();
+        loadFish(parseInt(this.value));
+      }, 300);
+    });
 
     function highlightMyFish() {
       if (!myFishId) return;
@@ -605,58 +378,41 @@
         if (el) {
           el.style.filter = 'brightness(1.2) drop-shadow(0 0 12px rgba(74,184,232,0.8))';
           el.style.zIndex = '50';
-          const sparkle = document.createElement('div');
-          sparkle.style.cssText = 'position:absolute;top:-8px;right:-8px;font-size:16px;pointer-events:none;animation:sparkle 1.5s ease-in-out infinite';
-          sparkle.textContent = '✨';
-          el.appendChild(sparkle);
+          const sp = document.createElement('div');
+          sp.style.cssText = 'position:absolute;top:-8px;right:-8px;font-size:16px;pointer-events:none;animation:sparkle 1.5s ease-in-out infinite';
+          sp.textContent = '✨';
+          el.appendChild(sp);
         }
       }, 1000);
     }
 
-    // ─── Utilities ───
+    Aquarium.init(document.getElementById('aquariumStage'));
+    document.getElementById('aquariumStage').addEventListener('dblclick', (e) => { Aquarium.handleFeed(e); });
 
+    // ─── Utilities ───
     function getDeviceId() {
       let id = localStorage.getItem('deviceId');
-      if (!id) {
-        id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
-        localStorage.setItem('deviceId', id);
-      }
+      if (!id) { id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10); localStorage.setItem('deviceId', id); }
       return id;
     }
 
-    function escHtml(str) {
-      const d = document.createElement('div');
-      d.textContent = str;
-      return d.innerHTML;
-    }
+    function escHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
     function showToast(msg) {
       const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
+      t.textContent = msg; t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2000);
     }
 
-    // Close modals on overlay click
-    document.getElementById('fishModal').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeFishModal();
-    });
-    document.getElementById('shareModal').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
-    });
-
-    // Keyboard
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { closeFishModal(); document.getElementById('shareModal').classList.remove('open'); }
-    });
+    document.getElementById('fishModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeFishModal(); });
+    document.getElementById('shareModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeFishModal(); document.getElementById('shareModal').classList.remove('open'); } });
 
     // ─── Background effects ───
-
     function createBubbles() {
       const c = document.getElementById('bubbles');
       for (let i = 0; i < 25; i++) {
-        const b = document.createElement('div');
-        b.className = 'bubble';
+        const b = document.createElement('div'); b.className = 'bubble';
         const s = 4 + Math.random() * 20;
         b.style.width = s + 'px'; b.style.height = s + 'px';
         b.style.left = Math.random() * 100 + '%';
@@ -669,8 +425,7 @@
     function createSeaweed() {
       const stage = document.getElementById('aquariumStage');
       for (let i = 0; i < 8; i++) {
-        const w = document.createElement('div');
-        w.className = 'seaweed';
+        const w = document.createElement('div'); w.className = 'seaweed';
         w.style.left = (5 + Math.random() * 90) + '%';
         w.style.height = (30 + Math.random() * 60) + 'px';
         w.style.animationDelay = (Math.random() * 4) + 's';
@@ -679,16 +434,8 @@
       }
     }
 
-    // Init aquarium
-    Aquarium.init(document.getElementById('aquariumStage'));
-
-    // Clean up: don't let Aquarium's own loadFishIntoAquarium run
-    // We override it before initAquarium is called
-
-    // Sparkle animation
-    const style = document.createElement('style');
-    style.textContent = '@keyframes sparkle { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }';
-    document.head.appendChild(style);
+    // Sparkle style
+    document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '@keyframes sparkle { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }' }));
   </script>
 </body>
 </html>

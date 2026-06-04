@@ -8,11 +8,13 @@ const DrawApp = {
   color: '#333333',
   brushSize: 3,
   isEraser: false,
+  isLandscape: false,
   history: [],
   historyIndex: -1,
   maxHistory: 50,
   fishConfidence: 0,
   detectionTimer: null,
+  ortSession: null,
 
   init(canvasId) {
     this.canvas = document.getElementById(canvasId);
@@ -50,6 +52,16 @@ const DrawApp = {
       this.setupCanvas();
       this.restoreState();
     });
+    this.loadModel();
+  },
+
+  async loadModel() {
+    if (!window.ort) return;
+    try {
+      this.ortSession = await window.ort.InferenceSession.create('/fish_doodle_classifier.onnx');
+    } catch (e) {
+      console.warn('ONNX model load failed, using fallback detection');
+    }
   },
 
   getPos(e) {
@@ -87,7 +99,7 @@ const DrawApp = {
     // Debounced fish detection
     if (!this.detectionTimer) {
       this.detectionTimer = setTimeout(() => {
-        this.detectFish();
+        this.detectFish().catch(() => {});
         this.detectionTimer = null;
       }, 200);
     }
@@ -95,27 +107,36 @@ const DrawApp = {
 
   stopDraw() {
     this.isDrawing = false;
-    this.detectFish();
+    this.detectFish().catch(() => {});
   },
 
-  // Heuristic fish detection (no ML model needed)
-  detectFish() {
-    const w = this.displayWidth;
-    const h = this.displayHeight;
-    const dpr = window.devicePixelRatio || 1;
-    const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+  // Fish detection via ONNX model, with pixel-count fallback
+  async detectFish() {
+    const canvas = this.canvas;
+    if (!canvas) return;
+
+    // Use ONNX model if available
+    if (this.ortSession) {
+      try {
+        const result = await this.verifyFishDoodle(canvas);
+        const pct = Math.round(result.prob * 100);
+        this.setFishConfidence(pct, result.isFish);
+        return;
+      } catch (e) { /* fall through to pixel method */ }
+    }
+
+    // Fallback: pixel count + bounding box heuristics
+    const w = canvas.width, h = canvas.height;
+    const imgData = this.ctx.getImageData(0, 0, w, h);
     const px = imgData.data;
-
-    let minX = this.canvas.width, minY = this.canvas.height, maxX = 0, maxY = 0;
-    let totalPixels = 0;
-    const T = 240; // color threshold
-
-    for (let y = 0; y < this.canvas.height; y++) {
-      for (let x = 0; x < this.canvas.width; x++) {
-        const i = (y * this.canvas.width + x) * 4;
-        const r = px[i], g = px[i+1], b = px[i+2], a = px[i+3];
-        if (a > 0 && (r < T || g < T || b < T)) {
-          totalPixels++;
+    const T = 240;
+    let drawn = 0;
+    let minX = w, maxX = 0, minY = h, maxY = 0;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4;
+        if (px[i+3] > 0 && (px[i] < T || px[i+1] < T || px[i+2] < T)) {
+          drawn++;
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
           if (y < minY) minY = y;
@@ -124,39 +145,97 @@ const DrawApp = {
       }
     }
 
-    // Not enough drawn
-    if (totalPixels < 50) {
-      this.setFishConfidence(0);
-      return;
-    }
+    const displayPixels = this.displayWidth * this.displayHeight;
+    const coverage = drawn / (w * h);
+    const pct = Math.round(coverage * 100);
 
-    // Simple check: anything with significant drawing passes
-    this.setFishConfidence(80);
+    const pixelThreshold = Math.max(200, displayPixels * 0.03);
+    if (drawn < pixelThreshold) { this.setFishConfidence(pct, false); return; }
+
+    const dpr = w / this.displayWidth;
+    const bbW = (maxX - minX + 1) / dpr;
+    const bbH = (maxY - minY + 1) / dpr;
+    const aspect = bbW / bbH;
+    const shapeOk = aspect >= 0.8 && aspect <= 4.0;
+    const bbPixels = (maxX - minX + 1) * (maxY - minY + 1);
+    const filled = drawn / bbPixels > 0.08;
+
+    this.setFishConfidence(pct, shapeOk && filled);
   },
 
-  setFishConfidence(value) {
-    this.fishConfidence = value;
+  setFishConfidence(pct, detected) {
+    this.fishConfidence = detected ? 60 + Math.round(pct * 0.4) : 0;
     const indicator = document.getElementById('fishIndicator');
     if (!indicator) return;
 
-    indicator.textContent = value >= 60 ? '✅ 是条鱼！' :
-                           value >= 30 ? '🎣 像条鱼...' : '✏️ 继续画...';
-    indicator.className = 'fish-indicator ' +
-      (value >= 60 ? 'good' : value >= 30 ? 'ok' : '');
-
-    // removed green glow per request
+    indicator.textContent = detected
+      ? `✅ 是条鱼！ (${pct}% 覆盖)`
+      : `✏️ 继续画... (${pct}%)`;
+    indicator.className = 'fish-indicator ' + (detected ? 'good' : '');
 
     // Enable/disable submit
     const btn = document.getElementById('submitBtn');
     if (btn) {
-      btn.disabled = value < 60;
-      btn.title = value < 60 ? '画一条能被认出来的鱼吧！' : '';
+      btn.disabled = !detected;
+      btn.title = detected ? '' : '画一条能被认出来的鱼吧！';
     }
     const hint = document.getElementById('submitHint');
     if (hint) {
-      hint.textContent = value >= 60 ? '✅ 鱼已识别，可以发布！' : '画一条能被识别的鱼才能发布';
-      hint.style.color = value >= 60 ? '#2ed573' : 'var(--text2)';
+      hint.textContent = detected ? '✅ 鱼已识别，可以发布！' : '画一条能被识别的鱼才能发布';
+      hint.style.color = detected ? '#2ed573' : 'var(--text2)';
     }
+  },
+
+  // ONNX model inference — matches drawafish.com logic
+  async fishProbability(canvas) {
+    const inputTensor = this.preprocessCanvas(canvas);
+    const feeds = {};
+    const inputName = this.ortSession.inputNames ? this.ortSession.inputNames[0] : 'input';
+    feeds[inputName] = inputTensor;
+    const results = await this.ortSession.run(feeds);
+    const output = results[Object.keys(results)[0]].data;
+    const sig = 1 / (1 + Math.exp(-output[0]));
+    return 1 - sig; // fish probability (model was trained with inverted labels)
+  },
+
+  async verifyFishDoodle(canvas) {
+    let inputCanvas = canvas;
+    if (this.isLandscape) {
+      // Unrotate content that was rotated +90° for landscape display
+      inputCanvas = document.createElement('canvas');
+      inputCanvas.width = canvas.height;
+      inputCanvas.height = canvas.width;
+      const ctx = inputCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, inputCanvas.width, inputCanvas.height);
+      ctx.translate(inputCanvas.width / 2, inputCanvas.height / 2);
+      ctx.rotate(-90 * Math.PI / 180);
+      ctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+    }
+    const prob = await this.fishProbability(inputCanvas);
+    return { prob, isFish: prob >= 0.25 };
+  },
+
+  preprocessCanvas(canvas) {
+    const SIZE = 224;
+    const temp = document.createElement('canvas');
+    const tCtx = temp.getContext('2d');
+    temp.width = SIZE; temp.height = SIZE;
+    tCtx.fillStyle = 'white';
+    tCtx.fillRect(0, 0, SIZE, SIZE);
+    tCtx.drawImage(canvas, 0, 0, SIZE, SIZE);
+    const data = tCtx.getImageData(0, 0, SIZE, SIZE).data;
+    const input = new Float32Array(1 * 3 * SIZE * SIZE);
+    const mean = [0.485, 0.456, 0.406];
+    const std = [0.229, 0.224, 0.225];
+    for (let i = 0; i < SIZE * SIZE; i++) {
+      const p = i * 4;
+      const r = data[p] / 255, g = data[p+1] / 255, b = data[p+2] / 255;
+      input[i] = (r - mean[0]) / std[0];
+      input[i + SIZE * SIZE] = (g - mean[1]) / std[1];
+      input[i + 2 * SIZE * SIZE] = (b - mean[2]) / std[2];
+    }
+    return new window.ort.Tensor('float32', input, [1, 3, SIZE, SIZE]);
   },
 
   setColor(color) {
@@ -182,7 +261,7 @@ const DrawApp = {
     ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
     this.history = [];
     this.historyIndex = -1;
-    this.setFishConfidence(0);
+    this.setFishConfidence(0, false);
     const wrap = (this.canvas && this.canvas.closest('.canvas-wrap')) || this.canvas;
     if (wrap) wrap.style.boxShadow = 'none';
   },
@@ -204,13 +283,32 @@ const DrawApp = {
     }
   },
 
+  restoreRotated(angle) {
+    if (this.historyIndex >= 0 && this.history[this.historyIndex]) {
+      const img = new Image();
+      img.onload = () => {
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
+        this.ctx.save();
+        this.ctx.translate(this.displayWidth / 2, this.displayHeight / 2);
+        this.ctx.rotate(angle * Math.PI / 180);
+        const scale = Math.min(this.displayWidth / img.height, this.displayHeight / img.width);
+        const dw = img.width * scale, dh = img.height * scale;
+        this.ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
+        this.ctx.restore();
+        this.detectFish().catch(() => {});
+      };
+      img.src = this.history[this.historyIndex];
+    }
+  },
+
   undo() {
     if (this.historyIndex > 0) {
       this.historyIndex--;
       this.ctx.fillStyle = '#ffffff';
       this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
       this.restoreState();
-      this.detectFish();
+      this.detectFish().catch(() => {});
     }
   },
 
